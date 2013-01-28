@@ -101,9 +101,19 @@ void testApp::gui1Event(ofxUIEventArgs &e)
 	//
 	
 	string name = e.widget->getName();
-	int kind = e.widget->getKind();
-//	ofLogVerbose() << "got event from: " << name << endl;
-	if(name == "RED")
+//	int kind = e.widget->getKind();
+//	ofLogVerbose() << "got event from: " << name << endl << "got event kind: " << kind;
+	if(name == "IP")
+	{
+		ofxUIDropDownList* list = (ofxUIDropDownList*)e.widget;
+		vector <ofxUIWidget*>widgets =  list->getSelected();
+		for(int i = 0 ; i < widgets.size() ; i++)
+		{
+			ofLogVerbose("IP") << widgets[i]->getName();
+			sender.setup(widgets[i]->getName(), PORT);
+		}
+	}
+	else if(name == "RED")
 	{
 		ofxUISlider *slider = (ofxUISlider *) e.widget;
 		ofLogVerbose() << "RED " << slider->getScaledValue() << endl;
@@ -228,6 +238,32 @@ void testApp::gui2Event(ofxUIEventArgs &e)
 		ofxUILabelButton *widget = (ofxUILabelButton *) e.widget;
 		m.setAddress("/"+name);
 		m.addIntArg(widget->getValue());
+		bundle.addMessage(m);
+		m.clear();
+	}
+	else if(name == "ENABLE_SCREENSAVER")
+	{
+		ofxUIToggle *widget = (ofxUIToggle *) e.widget;
+		m.setAddress("/"+name);
+		m.addIntArg(widget->getValue());
+		bundle.addMessage(m);
+		m.clear();
+	}else if(name == "ACCELERATION")
+	{
+		ofxUISlider *widget = (ofxUISlider *) e.widget;
+		m.setAddress("/"+name);
+		m.addFloatArg(widget->getScaledValue());
+		bundle.addMessage(m);
+		m.clear();
+	}
+	
+
+	
+	else if(name == "SPINNER")
+	{
+		ofxUIRotarySlider *widget = (ofxUIRotarySlider *) e.widget;
+		m.setAddress("/"+name);
+		m.addFloatArg(widget->getScaledValue());
 		bundle.addMessage(m);
 		m.clear();
 	}
@@ -480,6 +516,12 @@ void testApp::setGUI1()
 	//
 	//    bdrawGrid = false;
 	//	bdrawPadding = false;
+	vector<string> items;
+    items.push_back("192.168.6.113");
+    items.push_back("raspberrypi.local");
+    
+    gui1->addDropDownList("IP", items, 200);
+	
 	ofAddListener(gui1->newGUIEvent,this,&testApp::gui1Event);
 }
 
@@ -525,11 +567,14 @@ void testApp::setGUI2()
 	//
     gui2->addSpacer(length-xInit, 2);
     gui2->addWidgetDown(new ofxUILabel("LABEL BUTTON", OFX_UI_FONT_MEDIUM));
-    gui2->addLabelButton("LABEL BUTTON", false, length-xInit);
+    gui2->addLabelToggle("ENABLE_SCREENSAVER", false, length-xInit);
+	gui2->addWidgetDown(new ofxUIBiLabelSlider(length-xInit, 0.0, 1.0, 0.5, "ACCELERATION", "SLOW", "FAST", OFX_UI_FONT_MEDIUM));
+	gui2->addWidgetDown(new ofxUIRotarySlider(length-xInit, 0.0, 1.0f, .0, "SPINNER"));
 	
-	gui2->addSpacer(length-xInit, 2);
 	
-    gui2->addWidgetDown(new ofxUILabel("CIRCLE SLIDER", OFX_UI_FONT_MEDIUM));
+//	gui2->addSpacer(length-xInit, 2);
+	
+//    gui2->addWidgetDown(new ofxUILabel("CIRCLE SLIDER", OFX_UI_FONT_MEDIUM));
 
 	
 	//    gui2->addLabelButton("AUTOSIZE BUTTON", false);
